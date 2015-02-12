@@ -1,43 +1,104 @@
-#pragma once
+#include "Search.h"
 
-#include <iostream>
-#include <fstream>
-#include <random>
-using namespace std;
-
-class Search
+Search::~Search()
 {
-public:
-    bool sequential_find(int num);
-    bool recursive_binary_find(int num);
-    bool iterative_binary_find(int num);
-    
-    
-    
-    //Function to initialize the array with random numbers roughly the same size as the array
-    void init_array();
-    //Function to initialize the array with sorted random numbers
-    void init_sorted_array();
-    
-    void set_seed(int seed);
-    int getSize() const;
-    
-    // this is just for practice and debugging.
-    friend ostream& operator<< (ostream& out, const Search& s)
+    if(array!=nullptr)
     {
-        // put the code in here.
+        delete[] array;
     }
+    array = nullptr;
+}
+void Search::set_seed(int seed)
+{
+    srand(seed);
     
-    Search(int size,int seed=0)
+}
+int Search::getSize() const
+{
+    return aSize;
+}
+void Search::init_array()
+{
+    assert(aSize>0);
+    for(unsigned i = 0; i< aSize; i++)
     {
-        aSize=size;
-        array = new int[aSize];
+        array[i]=rand()/DIVIDER;
     }
-    ~Search();
+}
+void Search::init_sorted_array()
+{
+    assert(aSize>0);
+    array[0]= rand() % SORT_DIVIDER; 
+    for(unsigned i =0; i<aSize; i++)
+    {
+        array[i+1] = array[i] + rand() % SORT_DIVIDER;
+    }
+}
+bool Search::sequential_find(int num)
+{
+    for(int i=0; i<aSize; i++)
+    {
+        if(array[i] == num)
+            return true;
+    }
+    return false;
+
+
+}
+bool Search::iterative_binary_find(int num) 
+{
+    if(aSize==0)
+        return false;
+    int start = 0;
+    int last = aSize;
+    int mid = (aSize/ARRAY_DIVIDER) -1;
+    while(start <=last)
+    {
+        if(array[mid]== num)
+            return true;
+        else if(num > array[mid])
+        {
+            start = mid+1;
+            mid = start + ((last - start)/ARRAY_DIVIDER);
+        }
+        else if(num< array[mid])
+        {
+            last = mid-1;
+            mid = start + ((last - start)/ARRAY_DIVIDER);
+            
+        }
+    }
+    return false;
     
-private:
     
-    int aSize;
-    int* array;
-};
+}
+bool Search::recursive_binary_find(int num)
+{
+    int first =0;
+    return recursive_search_helper(num, first, aSize, array);
+    
+}
+bool Search::recursive_search_helper(int num, int first, int size, int* theArray) //NEED CONSTS
+{
+    int mid;
+    if(size==0)
+        return false;
+    else
+    {
+        mid=first + size/ARRAY_DIVIDER;
+        if(num==theArray[mid])
+            return true;
+        else if(num<theArray[mid])
+            return recursive_search_helper(num, first, size/ARRAY_DIVIDER, theArray);
+        else
+            return recursive_search_helper(num, mid+1, (size-1)/ARRAY_DIVIDER, theArray);
+            
+    }
+}
+
+
+
+
+
+
 
